@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فروشگاه آنلاین</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+    h1 { text-align: center; }
+    .container { max-width: 900px; margin: auto; }
+    .product-form, .product-list, .category-manager, .auth { margin-bottom: 20px; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .product { border-bottom: 1px solid #ccc; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+    img { max-height: 60px; }
+    input, select, button { padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>فروشگاه آنلاین</h1>
+    <div class="auth">
+      <label>رمز عبور مدیریت:
+        <input type="password" id="adminPass">
+      </label>
+      <button onclick="login()">ورود</button>
+    </div>
+    <div class="category-manager" style="display:none;">
+      <h3>مدیریت دسته‌بندی‌ها</h3>
+      <input type="text" id="newCategory" placeholder="دسته جدید">
+      <button onclick="addCategory()">افزودن دسته</button>
+      <ul id="categoryList"></ul>
+    </div>
+    <div class="product-form" style="display:none;">
+      <h3>افزودن محصول</h3>
+      <input type="text" id="productName" placeholder="نام محصول">
+      <input type="file" id="productImage">
+      <select id="productCategory"></select>
+      <button onclick="addProduct()">افزودن</button>
+    </div>
+    <div class="product-list">
+      <h3>محصولات</h3>
+      <div id="products"></div>
+    </div>
+  </div>
+
+  <script>
+    const maxDefault = 50;
+    let productCount = 0;
+    let isAdmin = false;
+    const categories = [];
+
+    function login() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === "admin123") {
+        isAdmin = true;
+        document.querySelector('.product-form').style.display = 'block';
+        document.querySelector('.category-manager').style.display = 'block';
+        alert("ورود موفق");
+      } else {
+        alert("رمز اشتباه است");
+      }
+    }
+
+    function addCategory() {
+      const name = document.getElementById("newCategory").value;
+      if (name && !categories.includes(name)) {
+        categories.push(name);
+        const li = document.createElement("li");
+        li.textContent = name;
+        document.getElementById("categoryList").appendChild(li);
+
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        document.getElementById("productCategory").appendChild(option);
+        document.getElementById("newCategory").value = '';
+      }
+    }
+
+    function addProduct() {
+      if (!isAdmin && productCount >= maxDefault) {
+        alert("محدودیت محصول به پایان رسیده است.");
+        return;
+      }
+
+      const name = document.getElementById("productName").value;
+      const category = document.getElementById("productCategory").value;
+      const imageInput = document.getElementById("productImage");
+      if (!name || !category || !imageInput.files[0]) {
+        alert("همه فیلدها الزامی هستند.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const productDiv = document.createElement("div");
+        productDiv.className = "product";
+        productDiv.innerHTML = `
+          <span>${name} (${category})</span>
+          <img src="${e.target.result}" alt="${name}">
+        `;
+        document.getElementById("products").appendChild(productDiv);
+        productCount++;
+        document.getElementById("productName").value = '';
+        imageInput.value = '';
+      };
+      reader.readAsDataURL(imageInput.files[0]);
+    }
+  </script>
+</body>
+</html>
